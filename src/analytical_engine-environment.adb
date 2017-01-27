@@ -12,12 +12,15 @@ package body Analytical_Engine.Environment is
                       Name                 => ".ae");
    end Cache_Directory;
 
-   function Root_Directory return String is
-      use Ada.Directories;
+   procedure Configure is
    begin
-      return Compose (Containing_Directory => Cache_Directory,
-                      Name                 => "root");
-   end Root_Directory;
+      Shell.Set_Environment (Name  => "SCHEMATIC_INSTALL_PREFIX",
+                             Value => Root_Directory);
+      Shell.Set_Environment (Name  => "SCHEMATIC_PARALLELISM",
+                             Value => "1");
+      Shell.Set_Environment (Name  => "PATH",
+                             Value => Exec_Directory & ":" & Ada.Environment_Variables.Value ("PATH"));
+   end Configure;
 
    function Exec_Directory return String is
       use Ada.Directories;
@@ -26,15 +29,11 @@ package body Analytical_Engine.Environment is
                       Name                 => "bin");
    end Exec_Directory;
 
-   procedure Configure is
+   function Root_Directory return String is
+      use Ada.Directories;
    begin
-      Shell.Set_Environment (Name  => "SCHEMATIC_INSTALL_PREFIX",
-                             Value => Root_Directory);
-      Shell.Set_Environment (Name  => "SCHEMATIC_PARALLELISM",
-                             Value => "1");
-      Shell.Set_Environment (Name  => "PATH",
-                             Value => Exec_Directory & ":" &
-                                      Ada.Environment_Variables.Value ("PATH"));
-   end Configure;
+      return Compose (Containing_Directory => Cache_Directory,
+                      Name                 => "root");
+   end Root_Directory;
 
 end Analytical_Engine.Environment;

@@ -1,9 +1,12 @@
+with Analytical_Engine.Schematic;
+
 package Analytical_Engine.Schematic_Handler is
 
-   type Instance (<>) is tagged with private;
+   type Instance (<>) is tagged private;
    subtype Class is Instance'Class;
 
-   function Create (Schematic : in Schematic.Instance) return Class;
+   function Create (Schematic : in Analytical_Engine.Schematic.Instance)
+                   return Class;
 
    function Name (Item : in Class) return String;
 
@@ -15,9 +18,9 @@ package Analytical_Engine.Schematic_Handler is
 
 private
 
-   type Instance (<>) is tagged
+   type Instance is tagged
       record
-         Schematic : Schematic.Instance;
+         Schematic : Analytical_Engine.Schematic.Instance;
       end record;
 
 end Analytical_Engine.Schematic_Handler;
