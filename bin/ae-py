@@ -16,7 +16,16 @@ os.putenv('SCHEMATIC_PARALLELISM', '1')
 # schematic installed binaries
 os.environ['PATH'] = os.pathsep.join([os.path.join(ROOT_DIR, 'bin'), os.environ['PATH']])
 
-class SchematicHandler:
+def read_pipe(name, pipe):
+    while True:
+        line = pipe.readline()
+        if not line:
+            break
+        sys.stdout.write("[%s] %s" % (name, line))
+        sys.stdout.flush()
+
+
+class SchematicHandler(object):
     def __init__(self, schematic):
         self.schematic = schematic
         self.name = schematic['name']
@@ -24,25 +33,6 @@ class SchematicHandler:
     def bootstrap(self):
         if not os.path.isdir(CACHE_DIR):
             os.mkdir(CACHE_DIR)
-        return self
-
-    def checkout(self):
-        print '>> checkout'
-        url = self.schematic['source']['url']
-        branch = self.schematic['source']['ref'] or 'master'
-        repos_dir = os.path.join(CACHE_DIR, 'repos')
-        self.checkout_dir = os.path.join(repos_dir, self.name)
-
-        if not os.path.isdir(repos_dir):
-            os.mkdir(repos_dir)
-
-        if not os.path.isdir(self.checkout_dir):
-            command = "git clone --depth 1 %s %s" % (url, self.checkout_dir)
-        else:
-            command = "cd %s && git fetch" % (self.checkout_dir)
-
-        self.__readpipe__(os.popen(command))
-        self.__readpipe__(os.popen("cd %s && git checkout origin/%s" % (self.checkout_dir, branch)))
         return self
 
     def prepare(self):
@@ -65,16 +55,50 @@ class SchematicHandler:
 
     def __run_steps__(self, steps):
         for s in steps:
-            self.__readpipe__(os.popen("cd %s && %s" % (self.checkout_dir, s)))
+            read_pipe(self.name,
+                    os.popen("cd %s && %s" % (self.checkout_dir, s)))
 
-    def __readpipe__(self, pipe):
-        while True:
-            line = pipe.readline()
-            if not line:
-                break
-            sys.stdout.write("[%s] %s" % (self.name, line))
-            sys.stdout.flush()
 
+class GitSchematicHandler(SchematicHandler):
+    def checkout(self):
+        print '>> checkout'
+        url = self.schematic['source']['url']
+        branch = self.schematic['source']['ref'] or 'master'
+        repos_dir = os.path.join(CACHE_DIR, 'repos')
+        self.checkout_dir = os.path.join(repos_dir, self.name)
+
+        if not os.path.isdir(repos_dir):
+            os.mkdir(repos_dir)
+
+        if not os.path.isdir(self.checkout_dir):
+            command = "git clone --depth 1 %s %s" % (url, self.checkout_dir)
+        else:
+            command = "cd %s && git fetch" % (self.checkout_dir)
+
+        read_pipe(self.name, os.popen(command))
+        read_pipe(self.name, os.popen("cd %s && git checkout origin/%s" % (self.checkout_dir, branch)))
+        return self
+
+class FileSchematicHandler(SchematicHandler):
+    def checkout(self):
+        print '>> checkout'
+        url = self.schematic['source']['url']
+        repos_dir = os.path.join(CACHE_DIR, 'repos')
+        self.checkout_dir = os.path.join(repos_dir, self.name)
+
+        versions = self.schematic['source']['versions']
+        filename = versions[0]['filename']
+        url = versions[0]['url']
+
+        if not os.path.isdir(repos_dir):
+            os.mkdir(repos_dir)
+
+        if not os.path.isdir(self.checkout_dir):
+            if not os.path.isfile(os.path.join(repos_dir, filename)):
+                read_pipe(self.name, os.popen('cd %s && curl -s %s > %s' % (repos_dir, url, filename)))
+            command = 'cd %s && mkdir %s && tar -C %s --strip-components 1 -zxvf %s' % (repos_dir, self.name, self.name, filename)
+            read_pipe(self.name, os.popen(command))
+        return self
 
 def traverse_schematic_graph(graph, key=None):
     if not key:
@@ -90,13 +114,18 @@ def traverse_schematic_graph(graph, key=None):
     for key in graph[key]:
         return traverse_schematic_graph(graph, key)
 
-
-
-class FileCatalog:
+class Catalog(object):
     def __init__(self, uri):
         self.uri = uri
         self.schematics = {}
 
+    def has_schematic(self, schematic):
+        if self.schematics.has_key(schematic):
+            return self.schematics[schematic]
+        return None
+
+
+class FileCatalog(Catalog):
     def load(self):
         path = re.split('file:\/\/', self.uri)[1]
         catalog_dir = os.path.join(path, 'catalog')
@@ -114,13 +143,22 @@ class FileCatalog:
                 self.schematics[qualified_name] = yaml.load(file(os.path.join(root, f)))
 
 
-    def has_schematic(self, schematic):
-        if self.schematics.has_key(schematic):
-            return self.schematics[schematic]
-        return None
-
     def __str__(self):
         return "FileCatalog(%s)" % self.uri
+
+
+class GitCatalog(FileCatalog):
+    def load(self):
+        repo_dir = os.path.join(CACHE_DIR, 'repos')
+        repo = re.match('git:\/\/(.*)\/(.*)\.git', self.uri).group(2)
+        full_path = os.path.join(repo_dir, repo)
+        if os.path.isdir(full_path):
+            read_pipe('git', os.popen('cd %s && git pull --rebase' % full_path))
+        else:
+            read_pipe('git',
+                    os.popen('cd %s && git clone --depth 1 %s' % (repo_dir, self.uri)))
+        self.uri = ''.join(['file://', full_path])
+        return super(GitCatalog, self).load()
 
 def install():
     if not os.path.isfile('schematics.yaml'):
@@ -129,7 +167,11 @@ def install():
 
     catalogs = []
     for catalog in schematics['catalogs']:
-        c = FileCatalog(catalog)
+        c = None
+        if re.match('file:\/\/', catalog):
+            c = FileCatalog(catalog)
+        elif re.match('git:\/\/', catalog):
+            c = GitCatalog(catalog)
         c.load()
         catalogs.append(c)
 
@@ -137,13 +179,23 @@ def install():
     todo = {}
     dependencies = []
     for schematic in schematics['schematics']:
+        components = schematic.split('@')
+        version = None
+        schematic = components[0]
+        if len(components) == 2:
+            version = components[1]
+
         for catalog in catalogs:
             graph[schematic] = []
             s = catalog.has_schematic(schematic)
             if not s:
                 print "!!! Could not find schematic for %s !!!" % schematic
                 return 1
-            todo[schematic] = SchematicHandler(s)
+            todo[schematic] = None
+            if s['source']['scm'] == 'git':
+                todo[schematic] = GitSchematicHandler(s)
+            elif s['source']['scm'] == 'file':
+                todo[schematic] = FileSchematicHandler(s)
             depends = s['schematics'] or []
             graph[schematic].extend(depends)
             dependencies.extend(depends)
@@ -154,7 +206,11 @@ def install():
             if not s:
                 print "!!! Could not find schematic for %s !!!" % schematic
                 return 1
-            todo[schematic] = SchematicHandler(s)
+            todo[schematic] = None
+            if s['source']['scm'] == 'git':
+                todo[schematic] = GitSchematicHandler(s)
+            elif s['source']['scm'] == 'file':
+                todo[schematic] = FileSchematicHandler(s)
             depends = s['schematics'] or []
             for d in depends:
                 if not graph.has_key(d):

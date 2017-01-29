@@ -1,5 +1,5 @@
 catalogs:
-  - file:///home/tyler/source/github/berriedale/schematics
+  - git://github.com/berriedale/schematics.git
 schematics:
   - adacore/aws
   - adacore/gtkada

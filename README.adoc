@@ -10,9 +10,14 @@ make working with Ada project dependencies easier.
 ----
 catalogs:
   - builtin://berriedale
+  - file:///tmp/ae-catalog
 schematics:
-  - gtkada
+  - adacore/gtkada
 ----
+
+The `schematics` key is of vital importance as that declares the dependencies
+for this project. The format is `publisher`/`name` and will map to a directory
+structure in the `catalog` wherever it may be found.
 
 
 == `ae` tool
@@ -23,6 +28,9 @@ schematics:
 ----
 % ae install
 ----
+
+The subcommand `install` will populate `$PWD/.ae` with the schematics defined
+in the `$PWD/schematics.yaml` file.
 
 
 === Using dependencies
