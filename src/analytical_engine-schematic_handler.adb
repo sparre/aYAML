@@ -5,6 +5,9 @@ with Analytical_Engine.Environment;
 
 package body Analytical_Engine.Schematic_Handler is
 
+   function "+" (Item : in String) return Ada.Strings.Unbounded.Unbounded_String
+     renames Ada.Strings.Unbounded.To_Unbounded_String;
+
    procedure Bootstrap (Item : in out Instance) is
       pragma Unreferenced (Item);
    begin
@@ -21,15 +24,27 @@ package body Analytical_Engine.Schematic_Handler is
    end Build;
 
    procedure Checkout (Item : in out Instance) is
-      pragma Unreferenced (Item);
    begin
       Ada.Text_IO.Put_Line (">> checkout");
+
+      declare
+         use Ada.Directories;
+
+         URL             : constant String := Item.Schematic.Get ("source").Get ("url");
+         Branch          : constant String := Item.Schematic.Get ("source").Get ("ref", Default => "master");
+         Repos_Directory : constant String := Compose (Environment.Cache_Directory,
+                                                       "repos");
+      begin
+         Item.Checkout_Directory := +Compose (Repos_Directory, Item.Name);
+
+      end;
    end Checkout;
 
-   function Create (Schematic : in Analytical_Engine.Schematic.Instance)
+   function Create (Schematic : in YAML.Object.Instance)
                    return Class is
    begin
-      return Instance'(Schematic => Schematic);
+      return Instance'(Schematic          => Schematic,
+                       Checkout_Directory => <>);
    end Create;
 
    procedure Install (Item : in out Instance) is
@@ -40,7 +55,7 @@ package body Analytical_Engine.Schematic_Handler is
 
    function Name (Item : in Class) return String is
    begin
-      return Item.Schematic.Name;
+      return Item.Schematic.Get ("name");
    end Name;
 
    procedure Prepare (Item : in out Instance) is

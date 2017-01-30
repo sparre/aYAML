@@ -1,11 +1,13 @@
-with Analytical_Engine.Schematic;
+with YAML.Object;
+
+private with Ada.Strings.Unbounded;
 
 package Analytical_Engine.Schematic_Handler is
 
    type Instance (<>) is tagged private;
    subtype Class is Instance'Class;
 
-   function Create (Schematic : in Analytical_Engine.Schematic.Instance)
+   function Create (Schematic : in YAML.Object.Instance)
                    return Class;
 
    function Name (Item : in Class) return String;
@@ -20,7 +22,8 @@ private
 
    type Instance is tagged
       record
-         Schematic : Analytical_Engine.Schematic.Instance;
+         Schematic          : YAML.Object.Instance;
+         Checkout_Directory : Ada.Strings.Unbounded.Unbounded_String;
       end record;
 
 end Analytical_Engine.Schematic_Handler;
