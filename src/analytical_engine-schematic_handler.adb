@@ -86,8 +86,8 @@ package body Analytical_Engine.Schematic_Handler is
                Pipe    : Shell.Pipe;
                Process : Shell.Process :=
                  Start (Program           => "git",
-                              Arguments         => (+"fetch"),
-                              Working_Directory => Item.Checkout_Directory,
+                              Arguments         => (1 => +"fetch"),
+                              Working_Directory => +Item.Checkout_Directory,
                         Output            => Pipe) with Unreferenced;
             begin
                Output.Configure (Name => Item.Name,
