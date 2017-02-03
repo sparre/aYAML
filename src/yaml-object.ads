@@ -16,6 +16,7 @@ package YAML.Object is
    generic
       type Element_Type is private;
       with function Value (Item : in String) return Element_Type;
+      with function Image (Item : in Element_Type) return String;
    package Parse is
       function Get (Item : in Instance;
                     Name : in String) return Element_Type;
