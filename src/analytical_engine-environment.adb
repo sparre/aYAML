@@ -1,7 +1,7 @@
 with Ada.Directories;
 with Ada.Environment_Variables;
 
-with Shell;
+with Shell.Environment;
 
 package body Analytical_Engine.Environment is
 
@@ -14,11 +14,11 @@ package body Analytical_Engine.Environment is
 
    procedure Configure is
    begin
-      Shell.Set_Environment (Name  => "SCHEMATIC_INSTALL_PREFIX",
+      Shell.Environment.Set (Name  => "SCHEMATIC_INSTALL_PREFIX",
                              Value => Root_Directory);
-      Shell.Set_Environment (Name  => "SCHEMATIC_PARALLELISM",
+      Shell.Environment.Set (Name  => "SCHEMATIC_PARALLELISM",
                              Value => "1");
-      Shell.Set_Environment (Name  => "PATH",
+      Shell.Environment.Set (Name  => "PATH",
                              Value => Exec_Directory & ":" & Ada.Environment_Variables.Value ("PATH"));
    end Configure;
 

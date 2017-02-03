@@ -16,6 +16,12 @@ package body Analytical_Engine.Schematic_Handler is
    function "&" (Left  : in String;
                  Right : in Ada.Strings.Unbounded.Unbounded_String) return String;
 
+   procedure Run_With_Prefixed_Output
+     (Prefix            : in     String;
+      Program           : in     String;
+      Arguments         : in     Shell.String_Array := Shell.Nil_Strings;
+      Working_Directory : in     String := ".");
+
    task type Log_From_Pipe is
       entry Configure (Name : in String;
                        Pipe : in Shell.Pipe);
@@ -80,37 +86,28 @@ package body Analytical_Engine.Schematic_Handler is
          end if;
 
          if Exists (+Item.Checkout_Directory) then
-            declare
-               use Shell;
-               Output  : Log_From_Pipe;
-               Pipe    : Shell.Pipe;
-               Process : Shell.Process :=
-                 Start (Program           => "git",
-                              Arguments         => (1 => +"fetch"),
-                              Working_Directory => +Item.Checkout_Directory,
-                        Output            => Pipe) with Unreferenced;
-            begin
-               Output.Configure (Name => Item.Name,
-                                 Pipe => Pipe);
-            end;
+            Run_With_Prefixed_Output
+              (Prefix            => Item.Name,
+               Program           => "git",
+               Arguments         => (1 => +"fetch"),
+               Working_Directory => +Item.Checkout_Directory);
          else
-            declare
-               use Shell;
-               Output  : Log_From_Pipe;
-               Pipe    : Shell.Pipe;
-               Process : Shell.Process :=
-                 Start (Program           => "git",
-                        Arguments         => (+"clone",
-                                              +"--depth",
-                                              +"1",
-                                              +URL,
-                                              Item.Checkout_Directory),
-                        Output            => Pipe) with Unreferenced;
-            begin
-               Output.Configure (Name => Item.Name,
-                                 Pipe => Pipe);
-            end;
+            Run_With_Prefixed_Output
+              (Prefix            => Item.Name,
+               Program           => "git",
+               Arguments         => (+"clone",
+                                     +"--depth",
+                                     +"1",
+                                     +URL,
+                                     Item.Checkout_Directory));
          end if;
+
+         Run_With_Prefixed_Output
+           (Prefix            => Item.Name,
+            Program           => "git",
+            Arguments         => (+"checkout",
+                                  +("origin/" & Branch)),
+            Working_Directory => +Item.Checkout_Directory);
       end;
    end Checkout;
 
@@ -137,5 +134,24 @@ package body Analytical_Engine.Schematic_Handler is
    begin
       Ada.Text_IO.Put_Line (">> prepare");
    end Prepare;
+
+   procedure Run_With_Prefixed_Output
+     (Prefix            : in     String;
+      Program           : in     String;
+      Arguments         : in     Shell.String_Array := Shell.Nil_Strings;
+      Working_Directory : in     String := ".")
+   is
+      use Shell;
+      Prefixed_Output : Log_From_Pipe;
+      Output          : Shell.Pipe;
+      Process         : Shell.Process :=
+                          Start (Program           => Program,
+                                 Arguments         => Arguments,
+                                 Working_Directory => Working_Directory,
+                                 Output            => Output) with Unreferenced;
+   begin
+      Prefixed_Output.Configure (Name => Prefix,
+                                Pipe => Output);
+   end Run_With_Prefixed_Output;
 
 end Analytical_Engine.Schematic_Handler;
