@@ -1,12 +1,14 @@
 package body YAML.Object is
 
+   overriding
    function Get (Item : in Instance;
-                 Name : in String) return Class is
+                 Name : in String) return Parent_Class is
       pragma Unreferenced (Item, Name);
    begin
       return raise Program_Error with "Not implemented yet.";
    end Get;
 
+   overriding
    function Get (Item : in Instance;
                  Name : in String) return String is
       pragma Unreferenced (Item, Name);
@@ -14,6 +16,7 @@ package body YAML.Object is
       return raise Program_Error with "Not implemented yet.";
    end Get;
 
+   overriding
    function Get (Item    : in Instance;
                  Name    : in String;
                  Default : in String) return String is
@@ -21,6 +24,22 @@ package body YAML.Object is
    begin
       return raise Program_Error with "Not implemented yet.";
    end Get;
+
+   overriding
+   function Has (Item : in Instance;
+                 Name : in String) return Boolean is
+      pragma Unreferenced (Item, Name);
+   begin
+      return raise Program_Error with "Not implemented yet.";
+   end Has;
+
+   overriding
+   function Node_Type (Item : in Instance;
+                       Name : in String) return Node_Types is
+      pragma Unreferenced (Item, Name);
+   begin
+      return raise Program_Error with "Not implemented yet.";
+   end Node_Type;
 
    package body Parse is
       function Get (Item : in Instance;
