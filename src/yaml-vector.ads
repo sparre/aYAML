@@ -1,6 +1,6 @@
 with YAML.Abstract_Object;
 
-package YAML.Object is
+package YAML.Vector is
 
    subtype Parent is Abstract_Object.Instance;
    subtype Parent_Class is Abstract_Object.Class;
@@ -62,4 +62,4 @@ private
          null;
       end record;
 
-end YAML.Object;
+end YAML.Vector;

@@ -1,11 +1,11 @@
-package body YAML.Object is
+package body YAML.Vector is
 
    overriding
    function Get (Item : in Instance;
                  Name : in String) return Parent_Class is
       pragma Unreferenced (Item, Name);
    begin
-      return raise Program_Error with "Not implemented yet.";
+      return raise Constraint_Error with "YAML.Object uses index-based look-up.";
    end Get;
 
    overriding
@@ -13,7 +13,7 @@ package body YAML.Object is
                  Index : in Positive) return Parent_Class is
       pragma Unreferenced (Item, Index);
    begin
-      return raise Constraint_Error with "YAML.Object uses name-based look-up.";
+      return raise Program_Error with "Not implemented yet.";
    end Get;
 
    overriding
@@ -21,7 +21,7 @@ package body YAML.Object is
                  Name : in String) return String is
       pragma Unreferenced (Item, Name);
    begin
-      return raise Program_Error with "Not implemented yet.";
+      return raise Constraint_Error with "YAML.Object uses index-based look-up.";
    end Get;
 
    overriding
@@ -29,7 +29,7 @@ package body YAML.Object is
                  Index : in Positive) return String is
       pragma Unreferenced (Item, Index);
    begin
-      return raise Constraint_Error with "YAML.Object uses name-based look-up.";
+      return raise Program_Error with "Not implemented yet.";
    end Get;
 
    overriding
@@ -38,7 +38,7 @@ package body YAML.Object is
                  Default : in String) return String is
       pragma Unreferenced (Item, Name, Default);
    begin
-      return raise Program_Error with "Not implemented yet.";
+      return raise Constraint_Error with "YAML.Object uses index-based look-up.";
    end Get;
 
    overriding
@@ -47,7 +47,7 @@ package body YAML.Object is
                  Default : in String) return String is
       pragma Unreferenced (Item, Index, Default);
    begin
-      return raise Constraint_Error with "YAML.Object uses name-based look-up.";
+      return raise Program_Error with "Not implemented yet.";
    end Get;
 
    overriding
@@ -55,7 +55,7 @@ package body YAML.Object is
                  Name : in String) return Boolean is
       pragma Unreferenced (Item, Name);
    begin
-      return raise Program_Error with "Not implemented yet.";
+      return False;
    end Has;
 
    overriding
@@ -63,7 +63,7 @@ package body YAML.Object is
                  Index : in Positive) return Boolean is
       pragma Unreferenced (Item, Index);
    begin
-      return False;
+      return raise Program_Error with "Not implemented yet.";
    end Has;
 
    package body Parse is
@@ -82,4 +82,4 @@ package body YAML.Object is
       end Get;
    end Parse;
 
-end YAML.Object;
+end YAML.Vector;
