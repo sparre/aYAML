@@ -1,8 +1,6 @@
 with Ada.Directories;
 with Ada.Environment_Variables;
 
-with Shell.Environment;
-
 package body Analytical_Engine.Environment is
 
    function Cache_Directory return String is
@@ -14,12 +12,12 @@ package body Analytical_Engine.Environment is
 
    procedure Configure is
    begin
-      Shell.Environment.Set (Name  => "SCHEMATIC_INSTALL_PREFIX",
-                             Value => Root_Directory);
-      Shell.Environment.Set (Name  => "SCHEMATIC_PARALLELISM",
-                             Value => "1");
-      Shell.Environment.Set (Name  => "PATH",
-                             Value => Exec_Directory & ":" & Ada.Environment_Variables.Value ("PATH"));
+      Ada.Environment_Variables.Set (Name  => "SCHEMATIC_INSTALL_PREFIX",
+                                     Value => Root_Directory);
+      Ada.Environment_Variables.Set (Name  => "SCHEMATIC_PARALLELISM",
+                                     Value => "1");
+      Ada.Environment_Variables.Set (Name  => "PATH",
+                                     Value => Exec_Directory & ":" & Ada.Environment_Variables.Value ("PATH"));
    end Configure;
 
    function Exec_Directory return String is
