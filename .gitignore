@@ -1,8 +1,5 @@
-*.sw*
-build/
 obj/
-.ae/
+bin/yaml-demo
 *~
 \#*\#
 .\#*
-bin/ae

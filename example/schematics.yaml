@@ -1,5 +1,0 @@
-catalogs:
-  - git://github.com/berriedale/schematics.git
-schematics:
-  - adacore/aws
-  - adacore/gtkada

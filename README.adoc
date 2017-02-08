@@ -1,50 +1,6 @@
-= Analytical Engine
+= aYAML
 
-The Analytical Engine (`ae`) is a Ada dependency management tool intended to
-make working with Ada project dependencies easier.
+aYAML is a pure Ada implementation of a YAML parser/generator.
 
+(Except that it isn't anywhere near done yet.)
 
-== schematics.yaml
-
-[source,yaml]
-----
-catalogs:
-  - builtin://berriedale
-  - file:///tmp/ae-catalog
-schematics:
-  - adacore/gtkada
-----
-
-The `schematics` key is of vital importance as that declares the dependencies
-for this project. The format is `publisher`/`name` and will map to a directory
-structure in the `catalog` wherever it may be found.
-
-
-== `ae` tool
-
-=== Installing schematics
-
-[source, bash]
-----
-% ae install
-----
-
-The subcommand `install` will populate `$PWD/.ae` with the schematics defined
-in the `$PWD/schematics.yaml` file.
-
-
-=== Using dependencies
-
-The subcommand `run` can be used to provide the appropriate environment
-variables for executing a program such that it can access installed schematics.
-
-[source, bash]
-----
-% ae run gprbuild
-----
-
-
-== .aerc
-
-The .aerc should be added to specific projects to override user-specific
-settings. Generally speaking these files should never be checked in.

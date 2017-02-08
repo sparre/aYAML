@@ -1,17 +1,10 @@
-with "ashell";
-
 project Default is
 
    for Source_Dirs use ("src");
    for Object_Dir use "obj";
    for Exec_Dir use "bin";
-   for Main use ("analytical_engine-runner.adb");
+   for Main use ("yaml-demo.adb");
 
-   package Builder is
-      for Executable ("analytical_engine-runner.adb") use "ae";
-   end Builder;
-
-   --  Enable Ada 2012.
    package Compiler is
       for Switches ("Ada") use ("-gnat2012",
                                 "-fstack-check",
